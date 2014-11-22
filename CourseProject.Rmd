@@ -19,17 +19,45 @@ But does it really?  Certainly marginal association has the manual transmission 
 #Data cleaning and processing
 The factor *am* which is of primary interest a numeric value, while it really represent 2 categories of cars - those with either manual or automatic transmission.  We transform it into a factor to make it more clear, and label the values A and M.
 
-```{r}
-mtcars$am <- as.factor(mtcars$am)
-levels(mtcars$am) <- c("A", "M")
-```
-
 #Exploratory Data Analysis
 
 We are using the 1974 Motor Trend Car Road Tests data set (mtcars) for our analysis, and are mostly interested in how transmission type affects the fuel efficiency (Miles per Gallon).  
 
 Lets explore the model to see which factors contribute to mpg.  We notice that several factors are correlated to mpg. We will need to create a model that shows which factors are confounding between am and mpg, and will do so in detail later in this document.
 
+We plot a regression line (mpg against weight) and indicate the transmission types in different colours.  
+It seems that heavier cars tend to have automatic transmission, while lighter cars tend to have manual transmission.  The data set has a range between 2.5lb and 3.5lb where both manual and automatic transmission samples are available. Automatic cars tend to have a higher mpg. Lets explore later how that affects the model.
+
+# Creating the model
+
+We consider the correlation values to determine which factors we need to include in our model.  Highly correlated factors are good candidates to be added.  We will perform nested model testing to determine which factors should be added. 
+
+The factors wt, cyl, disp, hp, drat, vs and am are all correlated with mpg.  The p values indicate that indeed these are all in the 99% significance interval.  Still, in the model creation we will need to take care not to include too many variables, in order to avoid the standard error to increase.
+
+With a p-value of 0.0.0005464, we reject the null hypothesis and conclude that adding hp is creating a significantlty different multivar model than the model without hp.  
+
+# Residual analysis
+The plots of Fitted values vs Residuals or vs Standardized residuals show no residual pattern, so we can conclude there is no residual heteroskedasticity. 
+The Normal Q-Q plot shows a normal distribution of the residuals.
+
+# Interpreting the model
+
+Our model explains 98% of the variance.  The most significant influence on mpg is wt.  For every half ton increase, mpg reduces with 2.88.  
+
+Keeping all other factors constant, then the model predicts that changing from manual to automatic transmission will reduce the mpg with 2.08 
+
+If we only take the weight range into account for which we have samples of both automatic and manual cars, the difference reduces to a drop by 0.709
+
+
+#Appendix 
+
+##Data Cleaning
+```{r}
+mtcars$am <- as.factor(mtcars$am)
+levels(mtcars$am) <- c("A", "M")
+```
+
+##Exploratory Data Analysis
 
 ```{r echo=FALSE, message=FALSE}
 par(mfrow = c(1, 2))
@@ -39,25 +67,13 @@ V1()
 
 ```
 
-Lets visualize the data to see Below we plot a regression line (mpg against weight) and indicate the transmission types in different colours.  
-It seems that heavier cars tend to have automatic transmission, while lighter cars tend to have manual transmission.  The data set has a range between 2.5lb and 3.5lb where both manual and automatic transmission samples are available.  In this range, the automatic cars tend to have a higher mpg.
 
-==> diferent slopes for blue and red ==> weight affects automatic cars less
+## Creating the model
 
-
-```{r, echo=FALSE, message=FALSE}
-```
-
-
-# Creating the model
-
-We consider the correlation values to determine which factors we need to include in our model.  Highly correlated factors are good candidates to be added.  We will perform nested model testing to determine which factors should be added. 
 
 ```{r echo=FALSE, message=FALSE}
 correlation.test("mpg")
 ```
-
-The factors wt, cyl, disp, hp, drat, vs and am are all correlated with mpg.  The p values indicate that indeed these are all in the 99% significance interval.  Still, in the model creation we will need to take care not to include too many variables, in order to avoid the standard error to increase.
 
 
 ```{r }
@@ -68,10 +84,8 @@ The factors wt, cyl, disp, hp, drat, vs and am are all correlated with mpg.  The
   anova(m1, m2, best)
 ```
 
-With a p-value of 0.0.0005464, we reject the null hypothesis and conclude that adding hp is creating a significantlty different multivar model than the model without hp.  
 
-# Residual analysis
-Lets review the residuals of our model, to check for signs of temporal patterns, heteroskedasticity and non-normality.
+## Residual analysis
 
 
 ```{r}
@@ -79,22 +93,14 @@ par(mfrow = c(2, 2))
 fit<-(lm(mpg~ wt + am + hp -1, data=mtcars)); plot(fit)
 ```
 
-The plots of Fitted values vs Residuals or vs Standardized residuals show no residual pattern, so we can conclude there is no residual heteroskedasticity. 
-The Normal Q-Q plot shows a normal distribution of the residuals.
 
-# Interpreting the model
+## Interpreting the model
 
 ```{r}
   best <- lm(mpg~ wt + am + hp -1, data=mtcars)
   summary(best)
 ```
 
-
-Our model explains 98% of the variance.  The most significant influence on mpg is wt.  For every half ton increase, mpg reduces with 2.88.  
-
-Keeping all other factors constant, then the model predicts that changing from manual to automatic transmission will reduce the mpg with 2.08 
-
-If we only take the weight range into account for which we have samples of both automatic and manual cars, the difference reduces to a drop by 0.709
 
 ```{r}
   min <- min(mtcars$wt[mtcars$am == "A"])
