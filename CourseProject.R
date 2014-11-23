@@ -12,7 +12,7 @@ library(car)  # for matrix scatter plots
 
 initialPlots <- function () {
   
-  plot (mtcars$mpg)
+  plot (mtcars$mpg) 
   plot (mtcars$am)
   
   plot (mtcars$mpg[mtcars$am == 0], col="red")
@@ -118,8 +118,11 @@ models <- function () {
   m1 <- lm(mpg~ wt -1, data=mtcars)
   m2 <- lm(mpg~ wt + am -1, data=mtcars)
   m3 <- lm(mpg~ wt + am + cyl -1, data=mtcars)
+#  m4 <- lm(mpg~ wt * am + cyl + hp -1, data=mtcars)
   m4 <- lm(mpg~ wt + am + cyl + hp -1, data=mtcars)
   
+m4 <- lm(mpg~ wt + am + qsec, data=mtcars)
+
   anova(m1, m2, m3, m4)
 #  m5 <- lm(mpg~ wt + am + cyl + hp + disp -1, data=mtcars_f)
 #  m6 <- lm(mpg~ wt + am + cyl + hp + vs -1, data=mtcars_f)
